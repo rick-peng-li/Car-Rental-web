@@ -1,0 +1,33 @@
+# Car Rental Web 一键启动
+# 启动: docker compose up --build -d
+# 访问: http://localhost:8080  (演示账号 admin / admin123)
+# 停止: docker compose down
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: car-rental-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+
+  app:
+    build: .
+    container_name: car-rental-app
+    restart: unless-stopped
+    # macOS 的 AirPlay 接收器默认占用 5000 端口，因此宿主机映射 8080；
+    # 若 5000 空闲可改为 "5000:5000"
+    ports:
+      - "8080:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGO_URL: mongodb://mongo:27017/car_rental
+      JWT_SECRET: change_this_secret_in_production
+      JWT_EXPIRES_IN: 7d
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: admin123
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
